@@ -1,0 +1,4 @@
+GET http://localhost:3001/api/persons
+###
+
+GET https://bitter-snow-9585.fly.dev/api/persons
