@@ -6,8 +6,10 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node index.js",
+    "build:ui": "rm -rf build && cd ./frontend/ && npm run build && cp -r build ../notes-backend",
     "dev": "nodemon index.js",
     "deploy": "flyctl deploy",
+    "deploy:full": "npm run build:ui && git add . && git commit -m uibuild && npm run deploy",
     "logs": "flyctl logs"
   },
   "repository": {
