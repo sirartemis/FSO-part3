@@ -1,8 +1,11 @@
+require('dotenv').config()
 const express = require('express')
 const morgan = require('morgan')
 const cors = require('cors')
 const app = express()
 const PORT = process.env.PORT || 3001
+
+const Person = require('./models/person')
 
 app.use(cors())
 app.use(express.static('build'))
@@ -13,82 +16,85 @@ morgan.token('body', req => {
 })
 app.use(morgan(':method :url :status :res[content-length] - :response-time ms :body'))
 
-let persons = [
-    { 
-      "id": 1,
-      "name": "Arto Hellas", 
-      "number": "040-123456"
-    },
-    { 
-      "id": 2,
-      "name": "Ada Lovelace", 
-      "number": "39-44-5323523"
-    },
-    { 
-      "id": 3,
-      "name": "Dan Abramov", 
-      "number": "12-43-234345"
-    },
-    { 
-      "id": 4,
-      "name": "Mary Poppendieck", 
-      "number": "39-23-6423122"
-    }
-]
-
-const generateId = () => {
-    const id = Math.floor(Math.random() * 1000000)
-    if (persons.filter(p => p.id === id).length > 0) return generateId()
-    return id
-}
-
 app.get('/api/persons', (request, response) => {
-    response.json(persons)
+    Person.find({}).then(persons => response.json(persons))
 })
 
-app.get('/info', (request, response) => {
-    const quantity = `Phonebook has info for ${persons.length} people`
-    const time = new Date()
-
-    response.send(`<p>${quantity}</p><p>${time}</p>`)
+app.get('/info', (request, response, next) => {
+    Person.find({})
+        .then(persons => {
+            response.send(`Phonebook has info for ${persons.length} people<br>${new Date()}`)
+        })
+        .catch(error => next(error))
 })
 
-app.get('/api/persons/:id', (request, response) => {
-    const id = Number(request.params.id)
-    persons.find(p => p.id === id) 
-        ? response.json(persons.filter(p => p.id === id)) 
-        : response.send('Person not found')
+app.post('/api/persons', (request, response, next) => {
+    const body = request.body
+
+    if (body.name === undefined) {
+        return response.status(400).json({error: 'Name is missing'})
+    }
+
+    if (body.number === undefined) {
+        return response.status(400).json({error: 'Number is missing'})
+    }
+
+    const person = new Person({
+        name: body.name,
+        number: body.number,
+    })
+
+    person.save()
+        .then(savedPerson => response.json(savedPerson))
+        .catch(error => next(error))
+})
+
+app.get('/api/persons/:id', (request, response, next) => {
+    Person.findById(request.params.id)
+        .then(person => {
+            if (person) {
+                response.json(person)
+            } else {
+                response.status(404).end()
+            }
+        })
+        .catch( err => next(err))
 })
 
 app.delete('/api/persons/:id', (request, response) => {
-    const id = Number(request.params.id)
-    persons.find(p => p.id === id)
-        ? (persons = persons.filter(p => p.id !== id)) && response.send('Person deleted')
-        : response.send('Person not found')
+    Person.findByIdAndRemove(request.params.id).then(result => {
+        response.status(204).end()
+    })
+    .catch(error => next(error))
 })
 
-app.post('/api/persons', (request, response) => {
-    const person = request.body
+app.put('/api/persons/:id', (request, response, next) => {
+    const body = request.body
 
-    if (!person.name) {
-        return response.json({error: "person must have a name"})
-    }
-    if (!person.number) {
-        return response.json({error: "person must have a number"})
-    }
-    if (persons.filter(p => p.name === person.name).length > 0) {
-        return response.json({error: "name must be unique"})
+    const person = {
+        name: body.name,
+        number: body.number,
     }
 
-    persons = [
-        ...persons,
-        {
-            ...person,
-            id: generateId()
-        }
-    ]
-    response.send('person added')
+    Person.findByIdAndUpdate(request.params.id, person, {new: true, runValidators: true, context: 'query'})
+        .then(updatedPerson => {
+            response.json(updatedPerson)
+        })
+        .catch(error => next(error))
 })
 
+const errorHandler = (error, request, response, next) => {
+    console.error(error.message)
+
+    if (error.name === 'CastError') {
+        return response.status(400).json({error: 'malformated id'})
+    } else if (error.name === 'ValidationError') {
+        return response.status(400).json({error: error.message})
+    }
+
+    next(error)
+}
+
+app.use(errorHandler)
 app.listen(PORT)
 console.log(`Server is running on port ${PORT}`)

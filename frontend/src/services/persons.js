@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const personsPath = '/api/persons'
-const baseUrl = `https://bitter-snow-9585.fly.dev${personsPath}`
+const baseUrl = `http://localhost:3001${personsPath}`  //`https://bitter-snow-9585.fly.dev${personsPath}`
 
 const getAll = () => {
     return axios

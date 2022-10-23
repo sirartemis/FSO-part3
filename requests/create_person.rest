@@ -25,7 +25,7 @@ Content-Type: application/json
 }
 ###
 
-POST https://bitter-snow-9585.fly.dev/api/persons
+POST http://localhost:3001/api/persons
 Content-Type: application/json
 
 {
@@ -33,9 +33,19 @@ Content-Type: application/json
 }
 ###
 
-POST https://bitter-snow-9585.fly.dev/api/persons
+POST http://localhost:3001/api/persons
 Content-Type: application/json
 
 {
     "number": "sdasfadf"
+}
+###
+
+
+POST http://localhost:3001/api/persons
+Content-Type: application/json
+
+{
+    "name": "lol",
+    "number": "1233455678899"
 }

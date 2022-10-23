@@ -126,15 +126,19 @@ const App = () => {
           setPersons(persons.map(contact => contact.id !== existingPerson[0].id ? contact : response))
           notify(`Updated ${newName}`)
         })
-        .catch(() => {
-          notify(`Information of ${newName} has already been removed from server`, 'error')
+        .catch((error) => {
+          notify(`${error.response.data.error}`, 'error')
           refreshPersons()
         })
     } else
     if (newName && newNumber) {
       person
         .create(newPerson)
-        .then(refreshPersons())
+        .then(() => refreshPersons())
+        .catch(error => {
+          notify(`${error.response.data.error}`, 'error')
+          refreshPersons()
+        })
       clearForm()
       notify(`Added ${newName}`)
     }
@@ -152,8 +156,8 @@ const App = () => {
         setPersons(persons.filter(contact => contact.id !== id))
         notify(`Deleted ${targetPerson}`)
       })
-      .catch(() => {
-        notify(`Information of ${targetPerson} has already been removed from server`, 'error')
+      .catch((error) => {
+        notify(`${error.response.data.error}`, 'error')
         refreshPersons()
       })
   }
