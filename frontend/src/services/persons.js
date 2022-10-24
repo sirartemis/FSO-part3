@@ -1,8 +1,7 @@
 import axios from "axios";
 
 const personsPath = '/api/persons'
-const baseUrl = `http://localhost:3001${personsPath}`  //`https://bitter-snow-9585.fly.dev${personsPath}`
-
+const baseUrl = `https://bitter-snow-9585.fly.dev${personsPath}`    //`http://localhost:3001${personsPath}`
 const getAll = () => {
     return axios
             .get(baseUrl)

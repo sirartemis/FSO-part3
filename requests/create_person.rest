@@ -49,3 +49,14 @@ Content-Type: application/json
     "name": "lol",
     "number": "1233455678899"
 }
+###
+
+
+POST https://bitter-snow-9585.fly.dev/api/persons
+Content-Type: application/json
+
+{
+    "name": "Arto Hellas",
+    "number": "123-123456789"
+}
+###
