@@ -26,9 +26,11 @@ const deletePerson = id => {
             .then(response => response.data)
 }
 
-export default {
+const personService = {
     getAll: getAll,
     create: create,
     update: update,
     deletePerson: deletePerson
 }
+
+export default personService
